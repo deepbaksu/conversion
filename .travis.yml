@@ -1,9 +1,16 @@
 language: go
 
 before_script:
-  - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.22.2
-  - go get github.com/mattn/goveralls
+  - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh
+    | sh -s -- -b $(go env GOPATH)/bin v1.22.2
+
+env:
+  global:
+    secure: hLQDzwKd44QsSXUZlIWYYke3AOKbdoxa59zWMTRLsWzSzVyQP7K5NUlgKQ5SXvAWfE00g0zaFo6fC6xo2pWu/snYigu8GNBDQa5QB9C42BFKolOdlWgmA3ZuXuQvjwnC+cUiOTvgj3wRFScDlp/kc6tF3BuSHTfuNlNQOiYTisAogvdZA4fmKHFZFePNTCJPFMev9MwEO1wkYTdW9v3S+pxDQUCXy55HzEN+lntrCXZJphdIXVIWxZKbC+bPnb9Al5tRbvnxpSTc57Y3bq9y30FX3ER2cxAgx2fk+WEg5neVNaOEsBIacilgqjXrRHUkhDg6C8cUX7No4vWDldYIW9EK4b/JUH2HQuSIePEFZIpxW96HJX9yFRJB0HnkIM+1tGHlY7AXMcaO0a6A6Xy6CDX5lxePsI8Rr/DzyHYzb4skoEv52mIRac6kfRwxkj165QNDNwZmlMU7+zFpemBt63YPTz+tObRQLbgkE0wHSis6RJMeRXleJFlsLmyejCdOGPjkpZK/yyS2ahfgSGOQDm23E2dzsDqS2sg0f7Ii7WbkxQpKtVD8VgcyM1ioabqRN4xWZzWNeNmNkPbkQo17VMeL92n0pitmyzZ+8L4Cx9F7c5ffh6wdaRZ/UT1AIdMcqY/viJ2S/udHEZEoZ6iwHcADFCC1sAex1Iq/+PWQpO8=
 
 script:
   - golangci-lint run
-  - goveralls -service=travis-ci
+  - go test -race -coverprofile=coverage.txt -covermode=atomic
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
