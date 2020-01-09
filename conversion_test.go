@@ -2,6 +2,7 @@ package conversion_test
 
 import (
 	"fmt"
+
 	"github.com/dl4ab/conversion"
 )
 
