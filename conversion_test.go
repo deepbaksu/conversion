@@ -132,3 +132,27 @@ func areSameErrors(err error, err2 error) bool {
 	}
 	return err == err2
 }
+
+func ExampleFlattenBytes32() {
+	xs := [][]byte{{1, 2, 3, 4}, {5, 6, 7, 8}}
+	fmt.Print(flattenBytes32(xs))
+	// Output: [1 2 3 4 5 6 7 8] <nil>
+}
+
+func ExampleFlattenBytes64() {
+	xs := [][]byte{{1, 2, 3, 4, 5, 6, 7, 8}, {9, 10, 11, 12, 13, 14, 15, 16}}
+	fmt.Print(flattenBytes64(xs))
+	// Output: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16] <nil>
+}
+
+func ExampleUnflattenBytes32() {
+	xs := []byte{1, 2, 3, 4, 5, 6, 7, 8}
+	fmt.Print(unflattenBytes32(xs))
+	// Output: [[1 2 3 4] [5 6 7 8]] <nil>
+}
+
+func ExampleUnflattenBytes64() {
+	xs := []byte{1, 2, 3, 4, 5, 6, 7, 8}
+	fmt.Print(unflattenBytes64(xs))
+	// Output: [[1 2 3 4 5 6 7 8]] <nil>
+}
