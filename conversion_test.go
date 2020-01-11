@@ -168,6 +168,7 @@ func ExampleFloat32ToBytes() {
 	bs := Float32ToBytes(x, optBig)
 	fmt.Printf("%#02v\n", bs)
 	// Output: []byte{0xc4, 0x0c, 0x52, 0x53}
+	// []byte{0x53, 0x52, 0x0c, 0xc4}
 }
 
 func ExampleBytesToFloat32() {
