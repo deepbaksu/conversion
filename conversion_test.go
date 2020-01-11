@@ -4,8 +4,14 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+
 	"testing"
+
+	"log"
 )
+
+var optBig = &Option{Endian: BigEndian}
+var optLittle = &Option{Endian: LittleEndian}
 
 func ExampleIntToFloat32() {
 	var x int = 3
@@ -155,4 +161,41 @@ func Example_unflattenBytes64() {
 	xs := []byte{1, 2, 3, 4, 5, 6, 7, 8}
 	fmt.Print(unflattenBytes64(xs))
 	// Output: [[1 2 3 4 5 6 7 8]] <nil>
+}
+
+func ExampleFloat32ToBytes() {
+	x := float32(-561.2863) // -561.2863, 0xc40c5253
+	bs := Float32ToBytes(x, optBig)
+	fmt.Printf("%#02v\n", bs)
+	// Output: []byte{0xc4, 0x0c, 0x52, 0x53}
+}
+
+func ExampleBytesToFloat32() {
+	xs := []byte{0xc4, 0x0c, 0x52, 0x53} // -561.2863, 0xc40c5253
+	fx, err := BytesToFloat32(xs, optBig)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("%v\n", fx)
+	// Output: -561.2863
+}
+
+func ExampleFloat64ToBytes() {
+	x := float64(-561.2863) // -561.2863, 0xc0818a4a57a786c2
+	bs := Float64ToBytes(x, optBig)
+	fmt.Printf("%#02v\n", bs)
+	// Output: []byte{0xc0, 0x81, 0x8a, 0x4a, 0x57, 0xa7, 0x86, 0xc2}
+}
+
+func ExampleBytesToFloat64() {
+	xs := []byte{0xc0, 0x81, 0x8a, 0x4a, 0x57, 0xa7, 0x86, 0xc2} // -561.2863, 0xc0818a4a57a786c2
+	fx, err := BytesToFloat64(xs, optBig)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("%v\n", fx)
+	// Output: -561.2863
+
 }
