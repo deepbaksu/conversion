@@ -165,8 +165,10 @@ func Example_unflattenBytes64() {
 
 func ExampleFloat32ToBytes() {
 	x := float32(-561.2863) // -561.2863, 0xc40c5253
-	bs := Float32ToBytes(x, optBig)
-	fmt.Printf("%#02v\n", bs)
+	bsBig := Float32ToBytes(x, optBig)
+	fmt.Printf("%#02v\n", bsBig)
+	bsLittle := Float32ToBytes(x, optLittle)
+	fmt.Printf("%#02v\n", bsLittle)
 	// Output: []byte{0xc4, 0x0c, 0x52, 0x53}
 	// []byte{0x53, 0x52, 0x0c, 0xc4}
 }
