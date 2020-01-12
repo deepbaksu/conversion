@@ -4,14 +4,27 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"reflect"
 
 	"testing"
 
 	"log"
 )
 
-var optBig = &Option{Endian: BigEndian}
-var optLittle = &Option{Endian: LittleEndian}
+var (
+	optBig    = &Option{Endian: BigEndian}
+	optLittle = &Option{Endian: LittleEndian}
+)
+
+var (
+	testInputF64      = float64(-561.2863)
+	testInputF64Bytes = []byte{0xc0, 0x81, 0x8a, 0x4a, 0x57, 0xa7, 0x86, 0xc2}
+)
+
+var (
+	testInputF32      = float32(-561.2863)
+	testInputF32Bytes = []byte{0xc4, 0x0c, 0x52, 0x53}
+)
 
 func ExampleIntToFloat32() {
 	var x int = 3
@@ -201,4 +214,142 @@ func ExampleBytesToFloat64() {
 	fmt.Printf("%v\n", fx)
 	// Output: -561.2863
 
+}
+
+func TestFloat32sToBytes(t *testing.T) {
+	type args struct {
+		xs []float32
+		o  *Option
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []byte
+		wantErr error
+	}{
+		{
+			name:    "it should convert []float32 to []byte",
+			args:    args{[]float32{float32(-561.2863)}, nil},
+			want:    []byte{0xc4, 0x0c, 0x52, 0x53},
+			wantErr: nil,
+		},
+		{
+			name:    "it should return empty []byte if []float32 is empty ",
+			args:    args{[]float32{}, nil},
+			want:    []byte{},
+			wantErr: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, got1 := Float32sToBytes(tt.args.xs, tt.args.o)
+			if !bytes.Equal(got, tt.want) {
+				t.Errorf("Float32sToBytes() got = %v, want %v", got, tt.want)
+			}
+			if !areSameErrors(got1, tt.wantErr) {
+				t.Errorf("Float32sToBytes() got1 = %v, want %v", got1, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestBytesToFloat32s(t *testing.T) {
+	type args struct {
+		xs []byte
+		o  *Option
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []float32
+		wantErr error
+	}{
+		{
+			name: "it should convert []byte to []float32",
+			args: args{
+				xs: testInputF32Bytes,
+				o:  nil,
+			},
+			want:    []float32{testInputF32},
+			wantErr: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := BytesToFloat32s(tt.args.xs, tt.args.o)
+			if !areSameErrors(err, tt.wantErr) {
+				t.Errorf("BytesToFloat32s() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("BytesToFloat32s() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFloat64sToBytes(t *testing.T) {
+	type args struct {
+		xs []float64
+		o  *Option
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []byte
+		wantErr error
+	}{
+		{
+			name:    "it should convert []float64 to []byte",
+			args:    args{[]float64{testInputF64}, nil},
+			want:    testInputF64Bytes,
+			wantErr: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, got1 := Float64sToBytes(tt.args.xs, tt.args.o)
+			if !bytes.Equal(got, tt.want) {
+				t.Errorf("Float64sToBytes() got = %v, want %v", got, tt.want)
+			}
+			if !areSameErrors(got1, tt.wantErr) {
+				t.Errorf("Float64sToBytes() got1 = %v, want %v", got1, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestBytesToFloat64s(t *testing.T) {
+	type args struct {
+		xs []byte
+		o  *Option
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []float64
+		wantErr error
+	}{
+		{
+			name: "it should convert []byte to []float64",
+			args: args{
+				xs: testInputF64Bytes,
+				o:  nil,
+			},
+			want:    []float64{testInputF64},
+			wantErr: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := BytesToFloat64s(tt.args.xs, tt.args.o)
+			if !areSameErrors(err, tt.wantErr) {
+				t.Errorf("BytesToFloat64s() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("BytesToFloat64s() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }
