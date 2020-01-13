@@ -130,3 +130,67 @@ func BytesToFloat64(x []byte, o *Option) (float64, error) {
 	}
 	return math.Float64frombits(ux), nil
 }
+
+// Float32sToBytes converts []float32 to []byte.
+// Step 1. Make 2D byte slice by []float32 -> [][4]byte
+// Step 2. Flatten [][4]byte to []byte
+func Float32sToBytes(xs []float32, o *Option) ([]byte, error) {
+	bs := make([][]byte, len(xs))
+	for i, x := range xs {
+		bs[i] = Float32ToBytes(x, o)
+	}
+	return flattenBytes32(bs)
+}
+
+// BytesToFloat32s converts []byte to []float32
+// Step 1. Unflatten []byte to [][4]byte
+// Step 2. [][4]byte to []float32
+func BytesToFloat32s(xs []byte, o *Option) ([]float32, error) {
+	var fs []float32
+	xxs, err := unflattenBytes32(xs)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, xs := range xxs {
+		xs, err := BytesToFloat32(xs, o)
+		if err != nil {
+			return nil, err
+		}
+		fs = append(fs, xs)
+	}
+
+	return fs, nil
+}
+
+// Float64sToBytes converts []float64 to []byte.
+// Step 1. Make 2D byte slice by []float64 -> [][8]byte
+// Step 2. Flatten [][8]byte to []byte
+func Float64sToBytes(xs []float64, o *Option) ([]byte, error) {
+	bs := make([][]byte, len(xs))
+	for i, x := range xs {
+		bs[i] = Float64ToBytes(x, o)
+	}
+	return flattenBytes64(bs)
+}
+
+// BytesToFloat64s converts []byte to []float64
+// Step 1. Unflatten []byte to [][8]byte
+// Step 2. [][8]byte to []float64
+func BytesToFloat64s(xs []byte, o *Option) ([]float64, error) {
+	var fs []float64
+	xxs, err := unflattenBytes64(xs)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, xs := range xxs {
+		xs, err := BytesToFloat64(xs, o)
+		if err != nil {
+			return nil, err
+		}
+		fs = append(fs, xs)
+	}
+
+	return fs, nil
+}
