@@ -33,29 +33,27 @@ func ExampleIntToFloat32() {
 }
 
 func TestFlattenInternal(t *testing.T) {
-	testCases := []struct {
-		name     string
+	t.Parallel()
+
+	testCases := map[string]struct {
 		input    [][]byte
 		inputDim int
 		expected []byte
 		err      error
 	}{
-		{
-			name:     "it should flatten [][4]byte to []byte",
+		"it should flatten [][4]byte to []byte": {
 			input:    [][]byte{{1, 2, 3, 4}, {5, 6, 7, 8}},
 			inputDim: 4,
 			expected: []byte{1, 2, 3, 4, 5, 6, 7, 8},
 			err:      nil,
 		},
-		{
-			name:     "if the input is not float32, it should return an error",
+		"if the input is not float32, it should return an error": {
 			input:    [][]byte{{1, 2, 3, 4, 5}, {5, 6, 7, 8, 9}},
 			inputDim: 4,
 			expected: nil,
 			err:      errors.New("expected [][4]byte, but received [][5]byte"),
 		},
-		{
-			name:     "it should flatten [][8]byte to []byte",
+		"it should flatten [][8]byte to []byte": {
 			input:    [][]byte{{1, 2, 3, 4, 5, 6, 7, 8}, {9, 10, 11, 12, 13, 14, 15, 16}},
 			inputDim: 8,
 			expected: []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16},
@@ -63,69 +61,66 @@ func TestFlattenInternal(t *testing.T) {
 		},
 	}
 
-	for _, testCase := range testCases {
-
+	for testName, testCase := range testCases {
 		// capture the value
-		testCase := testCase
+		tc, tn := testCase, testName
 
-		t.Run(testCase.name, func(t *testing.T) {
+		t.Run(tn, func(t *testing.T) {
 			t.Parallel()
-			ys, err := flattenInternal(testCase.input, testCase.inputDim)
+			ys, err := flattenInternal(tc.input, tc.inputDim)
 
 			errMsg := `
 Expected: %v 
 Received: %v`
 
-			if !areSameErrors(err, testCase.err) {
-				t.Errorf(errMsg, testCase.err, err)
+			if !areSameErrors(err, tc.err) {
+				t.Errorf(errMsg, tc.err, err)
 			}
-			if !bytes.Equal(ys, testCase.expected) {
-				t.Errorf(errMsg, testCase.expected, ys)
+			if !bytes.Equal(ys, tc.expected) {
+				t.Errorf(errMsg, tc.expected, ys)
 			}
 		})
 	}
 }
 
 func TestUnflattenInternal(t *testing.T) {
-	testCases := []struct {
-		name     string
+	t.Parallel()
+
+	testCases := map[string]struct {
 		input    []byte
 		inputDim int
 		expected [][]byte
 		err      error
 	}{
-		{
-			name:     "it should convert []byte to [][8]byte array",
+		"it should convert []byte to [][8]byte array": {
 			input:    []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16},
 			inputDim: 8,
 			expected: [][]byte{{1, 2, 3, 4, 5, 6, 7, 8}, {9, 10, 11, 12, 13, 14, 15, 16}},
 		},
-		{
-			name:     "it should return an error if the input is not a float64 slice",
+		"it should return an error if the input is not a float64 slice": {
 			input:    []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15},
 			inputDim: 8,
 			err:      errors.New("expected the length of xs to be a multiple of 8 but its size is 15"),
 		},
 	}
 
-	for _, testCase := range testCases {
-
+	for testName, testCase := range testCases {
 		// capture the value
-		testCase := testCase
+		tn, tc := testName, testCase
 
-		t.Run(testCase.name, func(t *testing.T) {
+		t.Run(tn, func(t *testing.T) {
 			t.Parallel()
-			ys, err := unflattenInternal(testCase.input, testCase.inputDim)
+			ys, err := unflattenInternal(tc.input, tc.inputDim)
 
 			errMsg := `
 Expected: %v 
 Received: %v`
 
-			if !areSameErrors(err, testCase.err) {
-				t.Errorf(errMsg, testCase.err, err)
+			if !areSameErrors(err, tc.err) {
+				t.Errorf(errMsg, tc.err, err)
 			}
-			if !areSame2dBytes(ys, testCase.expected) {
-				t.Errorf(errMsg, testCase.expected, ys)
+			if !areSame2dBytes(ys, tc.expected) {
+				t.Errorf(errMsg, tc.expected, ys)
 			}
 		})
 	}
@@ -144,7 +139,7 @@ func areSame2dBytes(ys [][]byte, expected [][]byte) bool {
 	return true
 }
 
-// Returns true if both err and err2 are <nil> or have the same error message.
+// areSameErrors returns true if both err and err2 are <nil> or have the same error message.
 func areSameErrors(err error, err2 error) bool {
 	if err != nil && err2 != nil {
 		return err.Error() == err2.Error()
@@ -217,55 +212,61 @@ func ExampleBytesToFloat64() {
 }
 
 func TestFloat32sToBytes(t *testing.T) {
+	t.Parallel()
+
 	type args struct {
 		xs []float32
 		o  *Option
 	}
-	tests := []struct {
-		name    string
+
+	testCases := map[string]struct {
 		args    args
 		want    []byte
 		wantErr error
 	}{
-		{
-			name:    "it should convert []float32 to []byte",
+		"it should convert []float32 to []byte": {
 			args:    args{[]float32{float32(-561.2863)}, nil},
 			want:    []byte{0xc4, 0x0c, 0x52, 0x53},
 			wantErr: nil,
 		},
-		{
-			name:    "it should return empty []byte if []float32 is empty ",
+		"it should return empty []byte if []float32 is empty ": {
 			args:    args{[]float32{}, nil},
 			want:    []byte{},
 			wantErr: nil,
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, got1 := Float32sToBytes(tt.args.xs, tt.args.o)
-			if !bytes.Equal(got, tt.want) {
-				t.Errorf("Float32sToBytes() got = %v, want %v", got, tt.want)
+
+	for testName, testCase := range testCases {
+		tn, tc := testName, testCase
+
+		t.Run(tn, func(t *testing.T) {
+			t.Parallel()
+
+			got, got1 := Float32sToBytes(tc.args.xs, tc.args.o)
+			if !bytes.Equal(got, tc.want) {
+				t.Errorf("Float32sToBytes() got = %v, want %v", got, tc.want)
 			}
-			if !areSameErrors(got1, tt.wantErr) {
-				t.Errorf("Float32sToBytes() got1 = %v, want %v", got1, tt.wantErr)
+			if !areSameErrors(got1, tc.wantErr) {
+				t.Errorf("Float32sToBytes() got1 = %v, want %v", got1, tc.wantErr)
 			}
 		})
 	}
 }
 
 func TestBytesToFloat32s(t *testing.T) {
+	t.Parallel()
+
 	type args struct {
 		xs []byte
 		o  *Option
 	}
-	tests := []struct {
-		name    string
+
+	testCases := map[string]struct {
 		args    args
 		want    []float32
 		wantErr error
 	}{
-		{
-			name: "it should convert []byte to []float32",
+		"it should convert []byte to []float32": {
 			args: args{
 				xs: testInputF32Bytes,
 				o:  nil,
@@ -274,64 +275,77 @@ func TestBytesToFloat32s(t *testing.T) {
 			wantErr: nil,
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := BytesToFloat32s(tt.args.xs, tt.args.o)
-			if !areSameErrors(err, tt.wantErr) {
-				t.Errorf("BytesToFloat32s() error = %v, wantErr %v", err, tt.wantErr)
+
+	for testName, testCase := range testCases {
+		tn, tc := testName, testCase
+
+		t.Run(tn, func(t *testing.T) {
+			t.Parallel()
+
+			got, err := BytesToFloat32s(tc.args.xs, tc.args.o)
+			if !areSameErrors(err, tc.wantErr) {
+				t.Errorf("BytesToFloat32s() error = %v, wantErr %v", err, tc.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("BytesToFloat32s() got = %v, want %v", got, tt.want)
+			if !reflect.DeepEqual(got, tc.want) {
+				t.Errorf("BytesToFloat32s() got = %v, want %v", got, tc.want)
 			}
 		})
 	}
 }
 
 func TestFloat64sToBytes(t *testing.T) {
+	t.Parallel()
+
 	type args struct {
 		xs []float64
 		o  *Option
 	}
-	tests := []struct {
+
+	testCases := map[string]struct {
 		name    string
 		args    args
 		want    []byte
 		wantErr error
 	}{
-		{
-			name:    "it should convert []float64 to []byte",
+		"it should convert []float64 to []byte": {
 			args:    args{[]float64{testInputF64}, nil},
 			want:    testInputF64Bytes,
 			wantErr: nil,
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, got1 := Float64sToBytes(tt.args.xs, tt.args.o)
-			if !bytes.Equal(got, tt.want) {
-				t.Errorf("Float64sToBytes() got = %v, want %v", got, tt.want)
+
+	for testName, testCase := range testCases {
+		tn, tc := testName, testCase
+
+		t.Run(tn, func(t *testing.T) {
+			t.Parallel()
+
+			got, got1 := Float64sToBytes(tc.args.xs, tc.args.o)
+			if !bytes.Equal(got, tc.want) {
+				t.Errorf("Float64sToBytes() got = %v, want %v", got, tc.want)
 			}
-			if !areSameErrors(got1, tt.wantErr) {
-				t.Errorf("Float64sToBytes() got1 = %v, want %v", got1, tt.wantErr)
+			if !areSameErrors(got1, tc.wantErr) {
+				t.Errorf("Float64sToBytes() got1 = %v, want %v", got1, tc.wantErr)
 			}
 		})
 	}
 }
 
 func TestBytesToFloat64s(t *testing.T) {
+	t.Parallel()
+
 	type args struct {
 		xs []byte
 		o  *Option
 	}
-	tests := []struct {
-		name    string
+
+	testCases := map[string]struct {
 		args    args
 		want    []float64
 		wantErr error
 	}{
-		{
-			name: "it should convert []byte to []float64",
+		"it should convert []byte to []float64": {
 			args: args{
 				xs: testInputF64Bytes,
 				o:  nil,
@@ -340,15 +354,20 @@ func TestBytesToFloat64s(t *testing.T) {
 			wantErr: nil,
 		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := BytesToFloat64s(tt.args.xs, tt.args.o)
-			if !areSameErrors(err, tt.wantErr) {
-				t.Errorf("BytesToFloat64s() error = %v, wantErr %v", err, tt.wantErr)
+
+	for testName, testCase := range testCases {
+		tn, tc := testName, testCase
+
+		t.Run(tn, func(t *testing.T) {
+			t.Parallel()
+
+			got, err := BytesToFloat64s(tc.args.xs, tc.args.o)
+			if !areSameErrors(err, tc.wantErr) {
+				t.Errorf("BytesToFloat64s() error = %v, wantErr %v", err, tc.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("BytesToFloat64s() got = %v, want %v", got, tt.want)
+			if !reflect.DeepEqual(got, tc.want) {
+				t.Errorf("BytesToFloat64s() got = %v, want %v", got, tc.want)
 			}
 		})
 	}
