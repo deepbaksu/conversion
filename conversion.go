@@ -71,7 +71,7 @@ func BytesToFloat64(x []byte, o *Option) (float64, error) {
 	var fx float64
 
 	if len(x) < 8 {
-		return fx, errors.New("length of []byte should be 4 or bigger")
+		return fx, errors.New("length of []byte should be 8 or bigger")
 	}
 
 	var ux uint64
