@@ -2,7 +2,6 @@ package conversion
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"reflect"
 
@@ -32,100 +31,6 @@ func ExampleIntToFloat32() {
 	// Output: 3 <nil>
 }
 
-func TestFlattenInternal(t *testing.T) {
-	t.Parallel()
-
-	testCases := map[string]struct {
-		input    [][]byte
-		inputDim int
-		expected []byte
-		err      error
-	}{
-		"it should flatten [][4]byte to []byte": {
-			input:    [][]byte{{1, 2, 3, 4}, {5, 6, 7, 8}},
-			inputDim: 4,
-			expected: []byte{1, 2, 3, 4, 5, 6, 7, 8},
-			err:      nil,
-		},
-		"if the input is not float32, it should return an error": {
-			input:    [][]byte{{1, 2, 3, 4, 5}, {5, 6, 7, 8, 9}},
-			inputDim: 4,
-			expected: nil,
-			err:      errors.New("expected [][4]byte, but received [][5]byte"),
-		},
-		"it should flatten [][8]byte to []byte": {
-			input:    [][]byte{{1, 2, 3, 4, 5, 6, 7, 8}, {9, 10, 11, 12, 13, 14, 15, 16}},
-			inputDim: 8,
-			expected: []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16},
-			err:      nil,
-		},
-	}
-
-	for testName, testCase := range testCases {
-		// capture the value
-		tc, tn := testCase, testName
-
-		t.Run(tn, func(t *testing.T) {
-			t.Parallel()
-			ys, err := flattenInternal(tc.input, tc.inputDim)
-
-			errMsg := `
-Expected: %v 
-Received: %v`
-
-			if !areSameErrors(err, tc.err) {
-				t.Errorf(errMsg, tc.err, err)
-			}
-			if !bytes.Equal(ys, tc.expected) {
-				t.Errorf(errMsg, tc.expected, ys)
-			}
-		})
-	}
-}
-
-func TestUnflattenInternal(t *testing.T) {
-	t.Parallel()
-
-	testCases := map[string]struct {
-		input    []byte
-		inputDim int
-		expected [][]byte
-		err      error
-	}{
-		"it should convert []byte to [][8]byte array": {
-			input:    []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16},
-			inputDim: 8,
-			expected: [][]byte{{1, 2, 3, 4, 5, 6, 7, 8}, {9, 10, 11, 12, 13, 14, 15, 16}},
-		},
-		"it should return an error if the input is not a float64 slice": {
-			input:    []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15},
-			inputDim: 8,
-			err:      errors.New("expected the length of xs to be a multiple of 8 but its size is 15"),
-		},
-	}
-
-	for testName, testCase := range testCases {
-		// capture the value
-		tn, tc := testName, testCase
-
-		t.Run(tn, func(t *testing.T) {
-			t.Parallel()
-			ys, err := unflattenInternal(tc.input, tc.inputDim)
-
-			errMsg := `
-Expected: %v 
-Received: %v`
-
-			if !areSameErrors(err, tc.err) {
-				t.Errorf(errMsg, tc.err, err)
-			}
-			if !areSame2dBytes(ys, tc.expected) {
-				t.Errorf(errMsg, tc.expected, ys)
-			}
-		})
-	}
-}
-
 func areSame2dBytes(ys [][]byte, expected [][]byte) bool {
 	if len(ys) != len(expected) {
 		return false
@@ -145,30 +50,6 @@ func areSameErrors(err error, err2 error) bool {
 		return err.Error() == err2.Error()
 	}
 	return err == err2
-}
-
-func Example_flattenBytes32() {
-	xs := [][]byte{{1, 2, 3, 4}, {5, 6, 7, 8}}
-	fmt.Print(flattenBytes32(xs))
-	// Output: [1 2 3 4 5 6 7 8] <nil>
-}
-
-func Example_flattenBytes64() {
-	xs := [][]byte{{1, 2, 3, 4, 5, 6, 7, 8}, {9, 10, 11, 12, 13, 14, 15, 16}}
-	fmt.Print(flattenBytes64(xs))
-	// Output: [1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16] <nil>
-}
-
-func Example_unflattenBytes32() {
-	xs := []byte{1, 2, 3, 4, 5, 6, 7, 8}
-	fmt.Print(unflattenBytes32(xs))
-	// Output: [[1 2 3 4] [5 6 7 8]] <nil>
-}
-
-func Example_unflattenBytes64() {
-	xs := []byte{1, 2, 3, 4, 5, 6, 7, 8}
-	fmt.Print(unflattenBytes64(xs))
-	// Output: [[1 2 3 4 5 6 7 8]] <nil>
 }
 
 func ExampleFloat32ToBytes() {
