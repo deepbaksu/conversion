@@ -3,6 +3,7 @@ package conversion
 import (
 	"bytes"
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"reflect"
 
 	"testing"
@@ -60,11 +61,31 @@ func ExampleBytesToFloat32() {
 	// Output: -561.2863
 }
 
+func TestBytesToFloat32_failBadInput(t *testing.T) {
+	// bad input as 32bits should have a length of 4.
+	xs := []byte{0xc4, 0x0c, 0x52}
+	_, err := BytesToFloat32(xs, optBig)
+	assert.EqualError(t, err, "length of []byte should be 4 or bigger")
+}
+
+func TestBytesToFloat32_littleEndian(t *testing.T) {
+	xs := []byte{0x53, 0x52, 0x0c, 0xc4} // -561.2863
+	fx, err := BytesToFloat32(xs, optLittle)
+	assert.NoError(t, err)
+	assert.InEpsilon(t, -561.2863, fx, 1e-4)
+}
+
 func ExampleFloat64ToBytes() {
-	x := float64(-561.2863) // -561.2863, 0xc0818a4a57a786c2
+	x := -561.2863 // -561.2863, 0xc0818a4a57a786c2
 	bs := Float64ToBytes(x, optBig)
 	fmt.Printf("%#02v\n", bs)
 	// Output: []byte{0xc0, 0x81, 0x8a, 0x4a, 0x57, 0xa7, 0x86, 0xc2}
+}
+
+func TestFloat64ToBytes_littleEndian(t *testing.T) {
+	x := -561.2863
+	bs := Float64ToBytes(x, optLittle)
+	assert.Equal(t, []byte{0xc2, 0x86, 0xa7, 0x57, 0x4a, 0x8a, 0x81, 0xc0}, bs)
 }
 
 func ExampleBytesToFloat64() {
@@ -76,7 +97,19 @@ func ExampleBytesToFloat64() {
 
 	fmt.Printf("%v\n", fx)
 	// Output: -561.2863
+}
 
+func TestBytesToFloat64_invalidInput(t *testing.T) {
+	invalidInput := []byte{0x1, 0x2, 0x3}
+	_, err := BytesToFloat64(invalidInput, nil)
+	assert.EqualError(t, err, "length of []byte should be 8 or bigger")
+}
+
+func TestBytesToFloat64_littleEndian(t *testing.T) {
+	xs := []byte{0xc2, 0x86, 0xa7, 0x57, 0x4a, 0x8a, 0x81, 0xc0} // -561.2863, 0xc0818a4a57a786c2
+	fx, err := BytesToFloat64(xs, optLittle)
+	assert.NoError(t, err)
+	assert.InEpsilon(t, -561.2863, fx, 1e-4)
 }
 
 func TestFloat32sToBytes(t *testing.T) {
@@ -132,7 +165,7 @@ func TestBytesToFloat32s(t *testing.T) {
 	testCases := map[string]struct {
 		args    args
 		want    []float32
-		wantErr error
+		wantErr bool
 	}{
 		"it should convert []byte to []float32": {
 			args: args{
@@ -140,7 +173,15 @@ func TestBytesToFloat32s(t *testing.T) {
 				o:  nil,
 			},
 			want:    []float32{testInputF32},
-			wantErr: nil,
+			wantErr: false,
+		},
+		"it should return an error when the input is invalid": {
+			args: args{
+				xs: []byte{0x0c, 0x52, 0x53},
+				o:  nil,
+			},
+			want:    nil,
+			wantErr: true,
 		},
 	}
 
@@ -151,13 +192,13 @@ func TestBytesToFloat32s(t *testing.T) {
 			t.Parallel()
 
 			got, err := BytesToFloat32s(tc.args.xs, tc.args.o)
-			if !areSameErrors(err, tc.wantErr) {
-				t.Errorf("BytesToFloat32s() error = %v, wantErr %v", err, tc.wantErr)
-				return
+			if tc.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
 			}
-			if !reflect.DeepEqual(got, tc.want) {
-				t.Errorf("BytesToFloat32s() got = %v, want %v", got, tc.want)
-			}
+
+			assert.Equal(t, tc.want, got)
 		})
 	}
 }
@@ -211,7 +252,7 @@ func TestBytesToFloat64s(t *testing.T) {
 	testCases := map[string]struct {
 		args    args
 		want    []float64
-		wantErr error
+		wantErr bool
 	}{
 		"it should convert []byte to []float64": {
 			args: args{
@@ -219,7 +260,15 @@ func TestBytesToFloat64s(t *testing.T) {
 				o:  nil,
 			},
 			want:    []float64{testInputF64},
-			wantErr: nil,
+			wantErr: false,
+		},
+		"it should fail if the input is not []float64": {
+			args: args{
+				xs: []byte{0x1, 0x2, 0x3},
+				o:  nil,
+			},
+			want:    nil,
+			wantErr: true,
 		},
 	}
 
@@ -230,10 +279,12 @@ func TestBytesToFloat64s(t *testing.T) {
 			t.Parallel()
 
 			got, err := BytesToFloat64s(tc.args.xs, tc.args.o)
-			if !areSameErrors(err, tc.wantErr) {
-				t.Errorf("BytesToFloat64s() error = %v, wantErr %v", err, tc.wantErr)
-				return
+			if tc.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
 			}
+
 			if !reflect.DeepEqual(got, tc.want) {
 				t.Errorf("BytesToFloat64s() got = %v, want %v", got, tc.want)
 			}
