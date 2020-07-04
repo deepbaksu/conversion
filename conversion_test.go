@@ -31,19 +31,6 @@ func ExampleIntToFloat32() {
 	// Output: 3 <nil>
 }
 
-func areSame2dBytes(ys [][]byte, expected [][]byte) bool {
-	if len(ys) != len(expected) {
-		return false
-	}
-	for i := range ys {
-		if !bytes.Equal(ys[i], expected[i]) {
-			return false
-		}
-	}
-
-	return true
-}
-
 // areSameErrors returns true if both err and err2 are <nil> or have the same error message.
 func areSameErrors(err error, err2 error) bool {
 	if err != nil && err2 != nil {
