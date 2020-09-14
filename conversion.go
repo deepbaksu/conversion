@@ -11,8 +11,10 @@ import (
 
 type Endian int
 
-const BigEndian Endian = 0
-const LittleEndian Endian = 1
+const (
+	BigEndian Endian = iota
+	LittleEndian
+)
 
 type Option struct {
 	Endian Endian
