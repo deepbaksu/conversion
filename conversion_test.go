@@ -11,6 +11,10 @@ import (
 	"log"
 )
 
+const (
+	binaryWidthTwo = "%#02v\n"
+)
+
 var (
 	optBig    = &Option{Endian: BigEndian}
 	optLittle = &Option{Endian: LittleEndian}
@@ -43,9 +47,9 @@ func areSameErrors(err error, err2 error) bool {
 func ExampleFloat32ToBytes() {
 	x := float32(-561.2863) // -561.2863, 0xc40c5253
 	bsBig := Float32ToBytes(x, optBig)
-	fmt.Printf("%#02v\n", bsBig)
+	fmt.Printf(binaryWidthTwo, bsBig)
 	bsLittle := Float32ToBytes(x, optLittle)
-	fmt.Printf("%#02v\n", bsLittle)
+	fmt.Printf(binaryWidthTwo, bsLittle)
 	// Output: []byte{0xc4, 0x0c, 0x52, 0x53}
 	// []byte{0x53, 0x52, 0x0c, 0xc4}
 }
@@ -78,7 +82,7 @@ func TestBytesToFloat32_littleEndian(t *testing.T) {
 func ExampleFloat64ToBytes() {
 	x := -561.2863 // -561.2863, 0xc0818a4a57a786c2
 	bs := Float64ToBytes(x, optBig)
-	fmt.Printf("%#02v\n", bs)
+	fmt.Printf(binaryWidthTwo, bs)
 	// Output: []byte{0xc0, 0x81, 0x8a, 0x4a, 0x57, 0xa7, 0x86, 0xc2}
 }
 
