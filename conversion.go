@@ -2,7 +2,7 @@
 package conversion
 
 import (
-	"github.com/dl4ab/conversion/internal"
+	"github.com/deepbaksu/conversion/internal"
 
 	"encoding/binary"
 	"errors"
