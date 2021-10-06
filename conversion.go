@@ -21,8 +21,8 @@ type Option struct {
 }
 
 // IntToFloat32 converts int to float32
-func IntToFloat32(x int) (float32, error) {
-	return float32(x), nil
+func IntToFloat32(x int) float32 {
+	return float32(x)
 }
 
 // Float32ToBytes converts float32 to []byte with length 4

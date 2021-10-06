@@ -3,8 +3,10 @@ package conversion
 import (
 	"bytes"
 	"fmt"
-	"github.com/stretchr/testify/assert"
+	"math"
 	"reflect"
+
+	"github.com/stretchr/testify/assert"
 
 	"testing"
 
@@ -27,9 +29,13 @@ var (
 )
 
 func ExampleIntToFloat32() {
-	var x int = 3
-	fmt.Println(IntToFloat32(x))
-	// Output: 3 <nil>
+	fmt.Println(math.MinInt64, math.MaxInt64)
+	fmt.Printf("%.2f\n", IntToFloat32(math.MinInt64))
+	fmt.Printf("%.2f\n", IntToFloat32(math.MaxInt64))
+	// Output:
+	// -9223372036854775808 9223372036854775807
+	// -9223372036854775808.00
+	// 9223372036854775808.00
 }
 
 // areSameErrors returns true if both err and err2 are <nil> or have the same error message.
