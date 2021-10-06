@@ -9,8 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"testing"
-
-	"log"
 )
 
 var (
@@ -58,26 +56,12 @@ func ExampleFloat32ToBytes() {
 
 func ExampleBytesToFloat32() {
 	xs := []byte{0xc4, 0x0c, 0x52, 0x53} // -561.2863, 0xc40c5253
-	fx, err := BytesToFloat32(xs, optBig)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Printf("%v\n", fx)
+	fmt.Println(BytesToFloat32(xs, optBig))
 	// Output: -561.2863
 }
-
-func TestBytesToFloat32_failBadInput(t *testing.T) {
-	// bad input as 32bits should have a length of 4.
-	xs := []byte{0xc4, 0x0c, 0x52}
-	_, err := BytesToFloat32(xs, optBig)
-	assert.EqualError(t, err, "length of []byte should be 4 or bigger")
-}
-
 func TestBytesToFloat32_littleEndian(t *testing.T) {
 	xs := []byte{0x53, 0x52, 0x0c, 0xc4} // -561.2863
-	fx, err := BytesToFloat32(xs, optLittle)
-	assert.NoError(t, err)
+	fx := BytesToFloat32(xs, optLittle)
 	assert.InEpsilon(t, -561.2863, fx, 1e-4)
 }
 
@@ -96,25 +80,12 @@ func TestFloat64ToBytes_littleEndian(t *testing.T) {
 
 func ExampleBytesToFloat64() {
 	xs := []byte{0xc0, 0x81, 0x8a, 0x4a, 0x57, 0xa7, 0x86, 0xc2} // -561.2863, 0xc0818a4a57a786c2
-	fx, err := BytesToFloat64(xs, optBig)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Printf("%v\n", fx)
+	fmt.Println(BytesToFloat64(xs, optBig))
 	// Output: -561.2863
 }
-
-func TestBytesToFloat64_invalidInput(t *testing.T) {
-	invalidInput := []byte{0x1, 0x2, 0x3}
-	_, err := BytesToFloat64(invalidInput, nil)
-	assert.EqualError(t, err, "length of []byte should be 8 or bigger")
-}
-
 func TestBytesToFloat64_littleEndian(t *testing.T) {
 	xs := []byte{0xc2, 0x86, 0xa7, 0x57, 0x4a, 0x8a, 0x81, 0xc0} // -561.2863, 0xc0818a4a57a786c2
-	fx, err := BytesToFloat64(xs, optLittle)
-	assert.NoError(t, err)
+	fx := BytesToFloat64(xs, optLittle)
 	assert.InEpsilon(t, -561.2863, fx, 1e-4)
 }
 

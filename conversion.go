@@ -5,7 +5,6 @@ import (
 	"github.com/deepbaksu/conversion/internal"
 
 	"encoding/binary"
-	"errors"
 	"math"
 )
 
@@ -38,21 +37,22 @@ func Float32ToBytes(x float32, o *Option) []byte {
 }
 
 // BytesToFloat32 converts []byte to float32
-// length of []byte should be 4 or bigger
-func BytesToFloat32(x []byte, o *Option) (float32, error) {
-	var fx float32
+// only 4 or less bytes will be converted
+func BytesToFloat32(x []byte, o *Option) float32 {
+	var bytes []byte
 
 	if len(x) < 4 {
-		return fx, errors.New("length of []byte should be 4 or bigger")
+		bytes = make([]byte, 4-len(x))
 	}
+	bytes = append(bytes, x...)
 
 	var ux uint32
 	if o == nil || o.Endian == BigEndian {
-		ux = binary.BigEndian.Uint32(x)
+		ux = binary.BigEndian.Uint32(bytes)
 	} else {
-		ux = binary.LittleEndian.Uint32(x)
+		ux = binary.LittleEndian.Uint32(bytes)
 	}
-	return math.Float32frombits(ux), nil
+	return math.Float32frombits(ux)
 }
 
 // Float64ToBytes converts float64 to []byte with length 8
@@ -68,21 +68,22 @@ func Float64ToBytes(x float64, o *Option) []byte {
 }
 
 // BytesToFloat64 converts []byte to float64
-// length of []byte should be 8 or bigger
-func BytesToFloat64(x []byte, o *Option) (float64, error) {
-	var fx float64
+// only 4 or less bytes will be converted
+func BytesToFloat64(x []byte, o *Option) float64 {
+	var bytes []byte
 
 	if len(x) < 8 {
-		return fx, errors.New("length of []byte should be 8 or bigger")
+		bytes = make([]byte, 8-len(x))
 	}
+	bytes = append(bytes, x...)
 
 	var ux uint64
 	if o == nil || o.Endian == BigEndian {
-		ux = binary.BigEndian.Uint64(x)
+		ux = binary.BigEndian.Uint64(bytes)
 	} else {
-		ux = binary.LittleEndian.Uint64(x)
+		ux = binary.LittleEndian.Uint64(bytes)
 	}
-	return math.Float64frombits(ux), nil
+	return math.Float64frombits(ux)
 }
 
 // Float32sToBytes converts []float32 to []byte.
@@ -107,11 +108,7 @@ func BytesToFloat32s(xs []byte, o *Option) ([]float32, error) {
 	}
 
 	for _, xs := range xxs {
-		xs, err := BytesToFloat32(xs, o)
-		if err != nil {
-			return nil, err
-		}
-		fs = append(fs, xs)
+		fs = append(fs, BytesToFloat32(xs, o))
 	}
 
 	return fs, nil
@@ -139,11 +136,7 @@ func BytesToFloat64s(xs []byte, o *Option) ([]float64, error) {
 	}
 
 	for _, xs := range xxs {
-		xs, err := BytesToFloat64(xs, o)
-		if err != nil {
-			return nil, err
-		}
-		fs = append(fs, xs)
+		fs = append(fs, BytesToFloat64(xs, o))
 	}
 
 	return fs, nil
